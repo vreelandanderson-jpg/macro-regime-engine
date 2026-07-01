@@ -653,7 +653,7 @@ st.markdown(
     .section-title { font-size:.78rem; color:#e7eef7; font-weight:1000; letter-spacing:.08em; text-transform:uppercase; }
     .section-caption { color:#8ea4b8; font-size:.62rem; }
 
-    /* v8.1 Global Live Action Engine: selectable live tiles */
+    /* v8.2 Full Universe Action Engine: selectable live tiles */
     .live-action-note { color:#8ea4b8; font-size:.68rem; line-height:1.25; margin-top:-2px; margin-bottom:8px; }
     .live-detail-panel { background: linear-gradient(135deg, rgba(13,28,45,.98), rgba(8,18,29,.96) 60%, rgba(29,24,58,.88)); border:1px solid rgba(93,124,151,.30); border-radius:16px; padding:12px 14px; margin:8px 0 12px 0; box-shadow:0 12px 28px rgba(0,0,0,.24); }
     .selected-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; }
@@ -819,10 +819,13 @@ with st.sidebar:
             "AI / Tech",
             "Market Internals",
             "Sector Rotation",
+            "Real Estate",
+            "Sub-Sectors",
             "Index Components",
             "Breadth",
             "Credit",
             "Volatility",
+            "Currencies",
             "Global Markets",
             "Bonds & Rates",
             "Dollar",
@@ -1651,7 +1654,7 @@ def market_snapshot_cards() -> None:
 # -----------------------------------------------------------------------------
 # v8.1 Global live action engine: selectable tiles + asset action panel
 # -----------------------------------------------------------------------------
-LIVE_TILE_GROUPS = ["All", "Indexes", "AI / Tech", "Bonds", "Dollar", "Commodities", "Crypto", "Internals", "Credit", "Volatility", "Global"]
+LIVE_TILE_GROUPS = ["All", "Indexes", "AI / Tech", "Bonds", "Dollar", "Commodities", "Currencies", "Real Estate", "Crypto", "Internals", "Credit", "Volatility", "Global"]
 
 LIVE_TILE_DEFS = [
     {"key": "SPX", "label": "SPX", "group": "Indexes", "lookup": ["S&P 500", "^GSPC", "SPY"], "role": "risk_asset", "related": ["QQQ", "RSP", "VIX", "DXY", "10Y", "HYG"], "sensitivity": "Broad risk appetite"},
@@ -1666,6 +1669,18 @@ LIVE_TILE_DEFS = [
     {"key": "SMH", "label": "SMH / SOXX", "group": "AI / Tech", "lookup": ["VanEck Semiconductor ETF", "iShares Semiconductor ETF", "SMH", "SOXX"], "role": "growth_asset", "related": ["NVDA", "AMD", "AVGO", "QQQ", "Yields"], "sensitivity": "Semiconductor leadership"},
     {"key": "HYG", "label": "HYG / Credit", "group": "Credit", "lookup": ["High Yield Credit ETF", "HYG", "Junk Bond ETF", "JNK"], "role": "credit", "related": ["SPX", "VIX", "Banks", "Yields"], "sensitivity": "Credit risk appetite"},
     {"key": "BTC", "label": "BTC", "group": "Crypto", "lookup": ["Bitcoin", "BTC-USD"], "role": "growth_asset", "related": ["DXY", "QQQ", "VIX", "Liquidity"], "sensitivity": "High-beta liquidity"},
+
+    {"key": "XLRE", "label": "XLRE", "group": "Real Estate", "lookup": ["Real Estate Sector", "XLRE"], "role": "rate_sensitive", "related": ["10Y", "VNQ", "IYR", "ITB", "MBB", "Banks"], "sensitivity": "Rate-sensitive real estate sector"},
+    {"key": "VNQ", "label": "VNQ", "group": "Real Estate", "lookup": ["Vanguard Real Estate ETF", "VNQ"], "role": "rate_sensitive", "related": ["XLRE", "IYR", "10Y", "TLT", "MBB", "Credit"], "sensitivity": "Broad REIT and property risk"},
+    {"key": "ITB", "label": "ITB", "group": "Real Estate", "lookup": ["US Home Construction ETF", "ITB"], "role": "rate_sensitive", "related": ["XHB", "10Y", "Mortgage rates", "HD", "XLY", "Credit"], "sensitivity": "Homebuilder / housing cycle pressure"},
+    {"key": "MBB", "label": "MBB", "group": "Real Estate", "lookup": ["Mortgage-Backed Securities ETF", "MBB"], "role": "credit", "related": ["10Y", "XLRE", "VNQ", "Banks", "Credit"], "sensitivity": "Mortgage-backed security stability"},
+    {"key": "EURUSD", "label": "EUR/USD", "group": "Currencies", "lookup": ["EUR/USD", "EURUSD=X"], "role": "fx_risk", "related": ["DXY", "Global", "Gold", "QQQ"], "sensitivity": "Dollar liquidity / euro confirmation"},
+    {"key": "USDJPY", "label": "USD/JPY", "group": "Currencies", "lookup": ["USD/JPY", "USDJPY=X"], "role": "fx_neutral", "related": ["10Y", "DXY", "Japan", "Carry"], "sensitivity": "Rate differential / carry pressure"},
+    {"key": "AUDUSD", "label": "AUD/USD", "group": "Currencies", "lookup": ["AUD/USD", "AUDUSD=X"], "role": "fx_risk", "related": ["China", "Copper", "DXY", "Global"], "sensitivity": "Global growth and China-sensitive FX"},
+    {"key": "DBC", "label": "DBC", "group": "Commodities", "lookup": ["Commodity Basket ETF", "DBC"], "role": "pressure_up", "related": ["Oil", "Copper", "DXY", "CPI", "Yields"], "sensitivity": "Broad commodity inflation impulse"},
+    {"key": "NATGAS", "label": "Nat Gas", "group": "Commodities", "lookup": ["Natural Gas Futures", "NG=F"], "role": "pressure_up", "related": ["Energy", "Inflation", "Utilities", "Europe"], "sensitivity": "Natural gas / energy inflation risk"},
+    {"key": "AGRI", "label": "Agri", "group": "Commodities", "lookup": ["Agriculture ETF", "DBA", "Wheat Futures", "Corn Futures"], "role": "pressure_up", "related": ["Food inflation", "CPI", "Dollar", "Oil"], "sensitivity": "Food inflation pressure"},
+    {"key": "SUBSECTORS", "label": "Sub-Sectors", "group": "Internals", "lookup": ["Transportation ETF", "Retail ETF", "Metals & Mining ETF", "Biotech ETF"], "role": "internal", "related": ["IYT", "XRT", "XME", "XBI", "Sectors"], "sensitivity": "Sub-sector rotation / breadth confirmation"},
     {"key": "GLOBAL", "label": "Global", "group": "Global", "lookup": ["Global ACWI ETF", "ACWI", "Emerging Markets ETF", "EEM"], "role": "risk_asset", "related": ["DXY", "Oil", "China", "Europe", "Japan"], "sensitivity": "World confirmation"},
 ]
 
@@ -1694,23 +1709,23 @@ def live_tile_state(tile: dict[str, object], row: pd.Series | None) -> dict[str,
     role = str(tile.get("role", "risk_asset"))
     if role in ["pressure_up"]:
         if change > 0 or score < -15:
-            state, klass, bias, target_dir = "Pressure Rising", "bad", "Upside pressure", "up"
+            state, klass, bias, target_dir = "Pressure Up", "bad", "Upside pressure", "up"
         elif change < 0 or score > 15:
-            state, klass, bias, target_dir = "Pressure Cooling", "good", "Downside relief", "down"
+            state, klass, bias, target_dir = "Cooling", "good", "Downside relief", "down"
         else:
             state, klass, bias, target_dir = "Mixed", "warn", "Range / wait", "range"
-    elif role in ["growth_asset", "risk_asset", "credit", "internal"]:
+    elif role in ["growth_asset", "risk_asset", "credit", "internal", "rate_sensitive", "fx_risk"]:
         if score > 15 or change > 0.35:
             state, klass, bias, target_dir = "Supportive", "good", "Upside / reclaim", "up"
         elif score < -15 or change < -0.35:
-            state, klass, bias, target_dir = "Under Pressure", "bad", "Downside pressure", "down"
+            state, klass, bias, target_dir = "Weak", "bad", "Downside pressure", "down"
         else:
             state, klass, bias, target_dir = "Mixed", "warn", "Range / wait", "range"
     else:
         if score > 15 or change > 0.35:
-            state, klass, bias, target_dir = "Bid / Firm", "good", "Upside pressure", "up"
+            state, klass, bias, target_dir = "Bid", "good", "Upside pressure", "up"
         elif score < -15 or change < -0.35:
-            state, klass, bias, target_dir = "Offered / Weak", "bad", "Downside pressure", "down"
+            state, klass, bias, target_dir = "Offered", "bad", "Downside pressure", "down"
         else:
             state, klass, bias, target_dir = "Mixed", "warn", "Range / wait", "range"
     return {"price": f"{safe_num(row.get('latest_close')):,.2f}", "change": change, "score": score, "state": state, "klass": klass, "bias": bias, "target_dir": target_dir}
@@ -1786,22 +1801,39 @@ def render_selected_tile_panel() -> None:
 
 
 def render_live_market_pulse() -> None:
-    st.markdown('<div class="section-head"><div class="section-title">Live Market Pulse</div><div class="section-caption">Selectable tiles drive the action panel; live data recalculates the whole engine</div></div>', unsafe_allow_html=True)
-    st.markdown('<div class="live-action-note">Global live refresh updates Action Console, gauges, targets, outcomes, alerts, search and the selected asset panel. Tiles are the control surface, not the only live feature.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-head"><div class="section-title">Live Market Pulse</div><div class="section-caption">Selectable clean tiles drive the action panel; live data recalculates the whole engine</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="live-action-note">Global live refresh updates Action Console, gauges, targets, outcomes, alerts, search and the selected asset panel. Tiles are structured action cards: asset, price, change, state.</div>', unsafe_allow_html=True)
     render_global_live_strip()
     group = st.radio("Tile category", LIVE_TILE_GROUPS, horizontal=True, label_visibility="collapsed", key="live_tile_group")
     tiles = live_tile_defs_for_group(group)
     if not tiles:
         st.info("No live tiles in this category yet.")
         return
-    for start_idx in range(0, len(tiles), 4):
-        cols = st.columns(4)
-        for col, tile in zip(cols, tiles[start_idx:start_idx + 4]):
+    for start_idx in range(0, len(tiles), 5):
+        cols = st.columns(5)
+        for col, tile in zip(cols, tiles[start_idx:start_idx + 5]):
             row = live_tile_row(tile)
             state = live_tile_state(tile, row)
-            label = f"{tile['label']}\n{state['price']}  {float(state['change']):+.2f}%\n{state['state']}"
+            klass = str(state.get("klass", "warn"))
+            chip_class = "chip-good" if klass == "good" else "chip-bad" if klass == "bad" else "chip-warn"
+            change = float(state.get("change", 0.0))
+            change_class = "good" if change > 0 else "bad" if change < 0 else "warn"
             with col:
-                if st.button(label, key=f"live_tile_{tile['key']}", use_container_width=True):
+                html = f"""
+                <div class="market-tile-card">
+                    <div class="market-tile-top">
+                        <div class="market-tile-symbol">{tile['label']}</div>
+                        <div class="market-tile-group">{tile['group']}</div>
+                    </div>
+                    <div class="market-tile-price">{state['price']}</div>
+                    <div class="market-tile-bottom">
+                        <div class="market-tile-change {change_class}">{change:+.2f}%</div>
+                        <div class="market-tile-chip {chip_class}">{state['state']}</div>
+                    </div>
+                </div>
+                """
+                st.markdown(html, unsafe_allow_html=True)
+                if st.button("Select", key=f"live_tile_{tile['key']}", use_container_width=True):
                     st.session_state.selected_live_tile = tile["key"]
                     st.rerun()
     render_selected_tile_panel()
@@ -2081,6 +2113,29 @@ def page_global() -> None:
     st.dataframe(view, use_container_width=True, hide_index=True)
 
 
+
+def page_global_category(category: str) -> None:
+    st.header(category)
+    table = global_table[global_table["category"].eq(category)].copy()
+    if table.empty:
+        st.info(f"No {category} data loaded yet.")
+        return
+    metrics = internal_participation(table)
+    cols = st.columns(4)
+    with cols[0]:
+        simple_card("Category", category, "Global confirmation map", "info")
+    with cols[1]:
+        simple_card("Positive", f"{metrics['positive_pct']:.0f}%", "Supportive names in this group", "good" if metrics['positive_pct'] >= 55 else "warn" if metrics['positive_pct'] >= 40 else "bad")
+    with cols[2]:
+        simple_card("Tracked", str(len(table)), "Live series", "info")
+    with cols[3]:
+        avg_score = safe_num(table["score"].mean()) if "score" in table else 0
+        simple_card("Score", f"{avg_score:.1f}", "Average group score", score_class(avg_score))
+    st.subheader("Series Table")
+    view = _format_view(filter_df(table, f"filter_global_{category}", f"Search {category}..."))
+    st.dataframe(view.sort_values("score", ascending=False), use_container_width=True, hide_index=True)
+
+
 def page_components() -> None:
     st.header("Index Components / Single-Stock Leadership")
     comp = internal_table[internal_table["category"].isin(["Index Components", "Single Stock Leadership"])].copy()
@@ -2256,6 +2311,10 @@ elif page == "Market Internals":
     page_internal()
 elif page == "Sector Rotation":
     page_internal("Sector Rotation")
+elif page == "Real Estate":
+    page_internal("Real Estate / Housing")
+elif page == "Sub-Sectors":
+    page_internal("Sub-Sectors")
 elif page == "Index Components":
     page_components()
 elif page == "Breadth":
@@ -2264,6 +2323,8 @@ elif page == "Credit":
     page_internal("Credit")
 elif page == "Volatility":
     page_internal("Volatility Internals")
+elif page == "Currencies":
+    page_global_category("Currencies")
 elif page == "Global Markets":
     page_global()
 elif page == "Bonds & Rates":

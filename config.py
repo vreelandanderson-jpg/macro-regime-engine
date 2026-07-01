@@ -1,4 +1,4 @@
-"""Configuration for Macro Regime Engine v7.2.
+"""Configuration for Macro Regime Engine v8.2.
 
 v7 is live-first and removes FRED/demo dependency.
 Primary live sources:
@@ -153,6 +153,52 @@ SERIES: list[SeriesConfig] = [
     SeriesConfig("BA", "Boeing", "yfinance", "Single Stock Leadership", "risk_on", "Industrial risk proxy", "Internal"),
     SeriesConfig("GS", "Goldman Sachs", "yfinance", "Single Stock Leadership", "risk_on", "Financial risk appetite proxy", "Internal"),
 
+
+    # v8.2 Full Universe Expansion — real estate / housing / rate-sensitive assets.
+    SeriesConfig("VNQ", "Vanguard Real Estate ETF", "yfinance", "Real Estate / Housing", "risk_on", "Broad REIT / real estate risk proxy", "Internal"),
+    SeriesConfig("IYR", "iShares US Real Estate ETF", "yfinance", "Real Estate / Housing", "risk_on", "US real estate ETF confirmation", "Internal"),
+    SeriesConfig("ITB", "US Home Construction ETF", "yfinance", "Real Estate / Housing", "risk_on", "Homebuilders / housing cycle proxy", "Internal"),
+    SeriesConfig("XHB", "Homebuilders ETF", "yfinance", "Real Estate / Housing", "risk_on", "Homebuilders and housing suppliers proxy", "Internal"),
+    SeriesConfig("MBB", "Mortgage-Backed Securities ETF", "yfinance", "Real Estate / Housing", "risk_on", "Mortgage-backed security stability proxy", "Internal"),
+    SeriesConfig("REM", "Mortgage REIT ETF", "yfinance", "Real Estate / Housing", "risk_on", "Mortgage REIT / rate-sensitive real estate proxy", "Internal"),
+
+    # v8.2 Sub-sector rotation map.
+    SeriesConfig("IYT", "Transportation ETF", "yfinance", "Sub-Sectors", "risk_on", "Transports / economic flow proxy", "Internal"),
+    SeriesConfig("XRT", "Retail ETF", "yfinance", "Sub-Sectors", "risk_on", "Retail / consumer demand proxy", "Internal"),
+    SeriesConfig("XME", "Metals & Mining ETF", "yfinance", "Sub-Sectors", "risk_on", "Metals/mining cyclicals and inflation rotation", "Internal"),
+    SeriesConfig("XOP", "Oil Exploration ETF", "yfinance", "Sub-Sectors", "neutral", "Oil exploration and production rotation", "Internal"),
+    SeriesConfig("OIH", "Oil Services ETF", "yfinance", "Sub-Sectors", "neutral", "Oil services / energy capex proxy", "Internal"),
+    SeriesConfig("TAN", "Solar ETF", "yfinance", "Sub-Sectors", "risk_on", "Solar / clean energy growth proxy", "Internal"),
+    SeriesConfig("JETS", "Airlines ETF", "yfinance", "Sub-Sectors", "risk_on", "Airlines / travel demand proxy", "Internal"),
+    SeriesConfig("IBB", "Biotech ETF", "yfinance", "Sub-Sectors", "risk_on", "Large-cap biotech risk appetite", "Internal"),
+    SeriesConfig("XBI", "Biotech Equal Weight ETF", "yfinance", "Sub-Sectors", "risk_on", "High-beta biotech breadth", "Internal"),
+    SeriesConfig("ITA", "Aerospace & Defense ETF", "yfinance", "Sub-Sectors", "neutral", "Aerospace/defense/geopolitical proxy", "Internal"),
+    SeriesConfig("XAR", "Aerospace & Defense Equal Weight ETF", "yfinance", "Sub-Sectors", "neutral", "Defense breadth / geopolitical proxy", "Internal"),
+
+    # v8.2 Currency map — confirms dollar liquidity and global risk pressure.
+    SeriesConfig("EURUSD=X", "EUR/USD", "yfinance", "Currencies", "risk_on", "Euro vs dollar liquidity proxy", "Global"),
+    SeriesConfig("USDJPY=X", "USD/JPY", "yfinance", "Currencies", "neutral", "Japan/rate differential and carry proxy", "Global"),
+    SeriesConfig("GBPUSD=X", "GBP/USD", "yfinance", "Currencies", "risk_on", "Sterling vs dollar risk proxy", "Global"),
+    SeriesConfig("CADUSD=X", "CAD/USD", "yfinance", "Currencies", "risk_on", "Canada/commodity FX proxy", "Global"),
+    SeriesConfig("AUDUSD=X", "AUD/USD", "yfinance", "Currencies", "risk_on", "China/global growth FX proxy", "Global"),
+    SeriesConfig("CHFUSD=X", "CHF/USD", "yfinance", "Currencies", "neutral", "Swiss franc safety/FX proxy", "Global"),
+    SeriesConfig("CEW", "Emerging Market Currency ETF", "yfinance", "Currencies", "risk_on", "Emerging-market FX risk appetite", "Global"),
+
+    # v8.2 Expanded commodity map.
+    SeriesConfig("NG=F", "Natural Gas Futures", "yfinance", "Commodities", "risk_off", "Natural gas / energy inflation pressure"),
+    SeriesConfig("ZW=F", "Wheat Futures", "yfinance", "Commodities", "risk_off", "Wheat / food inflation pressure"),
+    SeriesConfig("ZC=F", "Corn Futures", "yfinance", "Commodities", "risk_off", "Corn / food inflation pressure"),
+    SeriesConfig("ZS=F", "Soybean Futures", "yfinance", "Commodities", "risk_off", "Soybean / food inflation pressure"),
+    SeriesConfig("DBA", "Agriculture ETF", "yfinance", "Commodities", "risk_off", "Agriculture basket / food inflation proxy"),
+    SeriesConfig("DBC", "Commodity Basket ETF", "yfinance", "Commodities", "risk_off", "Broad commodity inflation proxy"),
+
+    # v8.2 Crypto liquidity and crypto-equity proxies.
+    SeriesConfig("SOL-USD", "Solana", "yfinance", "Crypto", "risk_on", "High-beta crypto risk proxy"),
+    SeriesConfig("COIN", "Coinbase", "yfinance", "Crypto Equity", "risk_on", "Crypto exchange / risk appetite proxy", "Internal"),
+    SeriesConfig("MSTR", "MicroStrategy", "yfinance", "Crypto Equity", "risk_on", "Bitcoin-equity beta proxy", "Internal"),
+    SeriesConfig("MARA", "Marathon Digital", "yfinance", "Crypto Equity", "risk_on", "Bitcoin miner beta proxy", "Internal"),
+    SeriesConfig("RIOT", "Riot Platforms", "yfinance", "Crypto Equity", "risk_on", "Bitcoin miner beta proxy", "Internal"),
+
     # Global market confirmation.
     SeriesConfig("EWC", "Canada ETF", "yfinance", "Global Markets", "risk_on", "Canada equity risk appetite", "Global"),
     SeriesConfig("EWU", "UK ETF", "yfinance", "Global Markets", "risk_on", "UK equity risk appetite", "Global"),
@@ -189,14 +235,18 @@ INTERNAL_CATEGORY_WEIGHTS: dict[str, float] = {
     "Index Components": 0.10,
     "Sector Rotation": 0.17,
     "Defensive Rotation": 0.10,
-    "Rate Sensitive": 0.08,
-    "Credit": 0.15,
-    "Volatility Internals": 0.10,
-    "Single Stock Leadership": 0.08,
+    "Rate Sensitive": 0.06,
+    "Real Estate / Housing": 0.08,
+    "Sub-Sectors": 0.08,
+    "Credit": 0.13,
+    "Volatility Internals": 0.09,
+    "Single Stock Leadership": 0.07,
+    "Crypto Equity": 0.04,
 }
 
 GLOBAL_CATEGORY_WEIGHTS: dict[str, float] = {
-    "Global Markets": 1.00,
+    "Global Markets": 0.70,
+    "Currencies": 0.30,
 }
 
 CATEGORY_WEIGHTS: dict[str, float] = {

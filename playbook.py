@@ -16,6 +16,35 @@ from auto_events import build_auto_event_calendar
 
 
 CAUSE_EFFECT_ROWS: list[dict[str, str]] = [
+
+    {
+        "area": "Real Estate / Housing",
+        "condition": "XLRE/VNQ/ITB weakening while 10Y yield rises",
+        "can_cause": "Rate-sensitive real estate pressure, mortgage-rate stress, homebuilder weakness, REIT repricing.",
+        "watch_for": "XLRE, VNQ, IYR, ITB, XHB, MBB versus 10Y/TLT and bank/credit proxies.",
+        "confirmation": "Real estate ETFs fail bounces while 10Y holds bid and MBB/credit softens.",
+        "trading_read": "Treat housing and REIT strength as suspect until yields cool or MBB stabilizes.",
+        "danger": "Real estate can bounce from defensive yield rotation if rates fall from growth scare.",
+    },
+    {
+        "area": "Currencies",
+        "condition": "Dollar strength broad against EUR/AUD/CAD/EMFX",
+        "can_cause": "Global liquidity pressure, commodity FX weakness, foreign-market stress, pressure on risk assets.",
+        "watch_for": "UUP/DXY up while EURUSD, AUDUSD, CADUSD, CEW weaken and global equities lag.",
+        "confirmation": "Dollar holds highs and non-US equities/commodities fail to confirm risk-on.",
+        "trading_read": "Risk-on needs more proof. Watch for QQQ/BTC/commodities to fade if dollar remains bid.",
+        "danger": "USDJPY can rise from carry/rate differential without broad dollar risk-off pressure.",
+    },
+    {
+        "area": "Sub-Sectors",
+        "condition": "Sub-sector rotation diverges from headline index",
+        "can_cause": "Hidden leadership shift, narrow index support, early sector stress or stealth accumulation.",
+        "watch_for": "IYT, XRT, XME, XBI, ITA, XOP, OIH, TAN versus SPY/QQQ/RSP.",
+        "confirmation": "Several sub-sectors lead/lag together while the headline index remains flat or misleading.",
+        "trading_read": "Do not trust broad index read alone. Use sub-sectors to identify where the real pressure is building.",
+        "danger": "Sub-sector ETFs can be thin or theme-driven; confirm with main sector and credit/volatility.",
+    },
+
     {
         "area": "US Dollar",
         "condition": "Dollar rising hard",
