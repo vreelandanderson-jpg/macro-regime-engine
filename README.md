@@ -1,17 +1,20 @@
-# Macro Regime Engine v8 — Action Console
+# Macro Regime Engine v8.1 — Global Live Action Engine
 
-v8 rebuilds the dashboard from a bulletin-board style dashboard into an action-first console.
+v8.1 upgrades the Action Console so live data powers the whole engine, not only the tiles.
 
 ## Main changes
 
-- Action Console home screen
-- NOW / DRIVER / PRESSURE / SUPPORT / NEXT RISK tiles
-- Target Board with pressure targets and cancel levels
-- Outcome Board with ranked scenarios
-- Confirm / Invalidate / Avoid board
-- Gauge row kept central: Macro, AI Growth, Internals, Liquidity, Risk
-- Search results now start with an action read before raw relationship tables
-- Raw data/detail pages remain available from the sidebar
+- Selectable Live Market Pulse tiles
+- Tile category filters: All, Indexes, AI/Tech, Bonds, Dollar, Commodities, Crypto, Internals, Credit, Volatility, Global
+- Selected asset Action Panel with NOW / TARGET / INVALIDATION / DRIVER / RELATED / EVENT RISK
+- Confirm / Invalidate / Avoid panel for the selected tile
+- Global Live State strip showing Action Console, Gauges, Targets, Alerts, and Data recalculation
+- Live updates now visually connect to gauges, target board, outcome board, alerts, search, and selected asset read
+- Action Console home screen retained
+- Target Board retained
+- Outcome Board retained
+- Confirm / Invalidate / Avoid board retained
+- Gauge row retained: Macro, AI Growth, Internals, Liquidity, Risk
 - Live-only setup preserved
 - Eastern/Toronto 12-hour time preserved
 - Auto re-run and background updater preserved

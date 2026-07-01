@@ -652,6 +652,25 @@ st.markdown(
     .section-head { display:flex; align-items:center; justify-content:space-between; margin:14px 0 5px 0; }
     .section-title { font-size:.78rem; color:#e7eef7; font-weight:1000; letter-spacing:.08em; text-transform:uppercase; }
     .section-caption { color:#8ea4b8; font-size:.62rem; }
+
+    /* v8.1 Global Live Action Engine: selectable live tiles */
+    .live-action-note { color:#8ea4b8; font-size:.68rem; line-height:1.25; margin-top:-2px; margin-bottom:8px; }
+    .live-detail-panel { background: linear-gradient(135deg, rgba(13,28,45,.98), rgba(8,18,29,.96) 60%, rgba(29,24,58,.88)); border:1px solid rgba(93,124,151,.30); border-radius:16px; padding:12px 14px; margin:8px 0 12px 0; box-shadow:0 12px 28px rgba(0,0,0,.24); }
+    .selected-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; }
+    .selected-title { font-size:1.05rem; font-weight:1000; color:#e7eef7; letter-spacing:-.02em; }
+    .selected-sub { font-size:.66rem; color:#8ea4b8; line-height:1.2; }
+    .tile-action-grid { display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap:8px; margin-top:8px; }
+    .tile-action-card { background:rgba(7,17,28,.82); border:1px solid rgba(93,124,151,.22); border-radius:12px; padding:9px 10px; min-height:88px; overflow:hidden; }
+    .tile-action-card .label { font-size:.55rem; color:#8ea4b8; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .tile-action-card .main { font-size:.86rem; color:#e7eef7; font-weight:950; line-height:1.12; margin-top:4px; }
+    .tile-action-card .sub { font-size:.62rem; color:#8ea4b8; line-height:1.16; margin-top:4px; }
+    .global-live-strip { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:8px; margin:8px 0 10px 0; }
+    .global-live-card { background:rgba(10,22,34,.72); border:1px solid rgba(93,124,151,.20); border-radius:12px; padding:8px 10px; min-height:68px; }
+    .global-live-card .label { font-size:.55rem; color:#8ea4b8; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .global-live-card .main { font-size:.82rem; color:#e7eef7; font-weight:900; margin-top:3px; }
+    .global-live-card .sub { font-size:.58rem; color:#8ea4b8; margin-top:2px; }
+    @media (max-width: 1180px) { .tile-action-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } .global-live-strip { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
     @media (max-width: 1180px) {
         .action-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .target-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1629,6 +1648,165 @@ def market_snapshot_cards() -> None:
                 )
 
 
+# -----------------------------------------------------------------------------
+# v8.1 Global live action engine: selectable tiles + asset action panel
+# -----------------------------------------------------------------------------
+LIVE_TILE_GROUPS = ["All", "Indexes", "AI / Tech", "Bonds", "Dollar", "Commodities", "Crypto", "Internals", "Credit", "Volatility", "Global"]
+
+LIVE_TILE_DEFS = [
+    {"key": "SPX", "label": "SPX", "group": "Indexes", "lookup": ["S&P 500", "^GSPC", "SPY"], "role": "risk_asset", "related": ["QQQ", "RSP", "VIX", "DXY", "10Y", "HYG"], "sensitivity": "Broad risk appetite"},
+    {"key": "QQQ", "label": "QQQ / NDX", "group": "Indexes", "lookup": ["QQQ", "Nasdaq 100", "^NDX"], "role": "growth_asset", "related": ["NVDA", "SMH", "DXY", "10Y", "VIX", "QQQE"], "sensitivity": "Growth / AI / duration pressure"},
+    {"key": "RSP", "label": "RSP", "group": "Internals", "lookup": ["Equal Weight S&P 500", "RSP"], "role": "internal", "related": ["SPX", "SPY", "Breadth", "Sectors"], "sensitivity": "Broad market participation"},
+    {"key": "DXY", "label": "DXY / UUP", "group": "Dollar", "lookup": ["US Dollar Index", "US Dollar ETF", "DX-Y.NYB", "UUP"], "role": "pressure_up", "related": ["Gold", "QQQ", "10Y", "BTC", "Oil"], "sensitivity": "Dollar liquidity pressure"},
+    {"key": "10Y", "label": "10Y Yield", "group": "Bonds", "lookup": ["US 10Y Yield", "^TNX"], "role": "pressure_up", "related": ["QQQ", "DXY", "Gold", "TLT", "Banks"], "sensitivity": "Rate / valuation pressure"},
+    {"key": "VIX", "label": "VIX", "group": "Volatility", "lookup": ["VIX", "^VIX"], "role": "pressure_up", "related": ["SPX", "QQQ", "VVIX", "VIX9D", "Credit"], "sensitivity": "Fear / hedge demand"},
+    {"key": "GOLD", "label": "Gold", "group": "Commodities", "lookup": ["Gold Futures", "GC=F"], "role": "neutral_asset", "related": ["DXY", "10Y", "Real yields", "VIX", "CPI"], "sensitivity": "Safety / inflation hedge"},
+    {"key": "OIL", "label": "Oil", "group": "Commodities", "lookup": ["WTI Crude Oil", "CL=F", "Brent Crude Oil"], "role": "pressure_up", "related": ["CPI", "DXY", "Energy", "EIA", "Geopolitics"], "sensitivity": "Energy / inflation shock"},
+    {"key": "NVDA", "label": "NVDA", "group": "AI / Tech", "lookup": ["Nvidia", "NVDA"], "role": "growth_asset", "related": ["SMH", "SOXX", "QQQ", "AMD", "AVGO", "AI"], "sensitivity": "AI leadership confirmation"},
+    {"key": "SMH", "label": "SMH / SOXX", "group": "AI / Tech", "lookup": ["VanEck Semiconductor ETF", "iShares Semiconductor ETF", "SMH", "SOXX"], "role": "growth_asset", "related": ["NVDA", "AMD", "AVGO", "QQQ", "Yields"], "sensitivity": "Semiconductor leadership"},
+    {"key": "HYG", "label": "HYG / Credit", "group": "Credit", "lookup": ["High Yield Credit ETF", "HYG", "Junk Bond ETF", "JNK"], "role": "credit", "related": ["SPX", "VIX", "Banks", "Yields"], "sensitivity": "Credit risk appetite"},
+    {"key": "BTC", "label": "BTC", "group": "Crypto", "lookup": ["Bitcoin", "BTC-USD"], "role": "growth_asset", "related": ["DXY", "QQQ", "VIX", "Liquidity"], "sensitivity": "High-beta liquidity"},
+    {"key": "GLOBAL", "label": "Global", "group": "Global", "lookup": ["Global ACWI ETF", "ACWI", "Emerging Markets ETF", "EEM"], "role": "risk_asset", "related": ["DXY", "Oil", "China", "Europe", "Japan"], "sensitivity": "World confirmation"},
+]
+
+
+def live_tile_defs_for_group(group: str) -> list[dict[str, object]]:
+    if group == "All":
+        return LIVE_TILE_DEFS
+    return [tile for tile in LIVE_TILE_DEFS if tile["group"] == group]
+
+
+def live_tile_row(tile: dict[str, object]) -> pd.Series | None:
+    names = [str(x) for x in tile.get("lookup", [])]
+    row = row_by_any(combined_table, names)
+    if row is None:
+        row = row_by_any(internal_table, names)
+    if row is None:
+        row = row_by_any(global_table, names)
+    return row
+
+
+def live_tile_state(tile: dict[str, object], row: pd.Series | None) -> dict[str, str | float]:
+    if row is None:
+        return {"price": "Waiting", "change": 0.0, "score": 0.0, "state": "No live row", "klass": "warn", "bias": "Wait", "target_dir": "range"}
+    change = safe_num(row.get("change_pct"))
+    score = safe_num(row.get("score"))
+    role = str(tile.get("role", "risk_asset"))
+    if role in ["pressure_up"]:
+        if change > 0 or score < -15:
+            state, klass, bias, target_dir = "Pressure Rising", "bad", "Upside pressure", "up"
+        elif change < 0 or score > 15:
+            state, klass, bias, target_dir = "Pressure Cooling", "good", "Downside relief", "down"
+        else:
+            state, klass, bias, target_dir = "Mixed", "warn", "Range / wait", "range"
+    elif role in ["growth_asset", "risk_asset", "credit", "internal"]:
+        if score > 15 or change > 0.35:
+            state, klass, bias, target_dir = "Supportive", "good", "Upside / reclaim", "up"
+        elif score < -15 or change < -0.35:
+            state, klass, bias, target_dir = "Under Pressure", "bad", "Downside pressure", "down"
+        else:
+            state, klass, bias, target_dir = "Mixed", "warn", "Range / wait", "range"
+    else:
+        if score > 15 or change > 0.35:
+            state, klass, bias, target_dir = "Bid / Firm", "good", "Upside pressure", "up"
+        elif score < -15 or change < -0.35:
+            state, klass, bias, target_dir = "Offered / Weak", "bad", "Downside pressure", "down"
+        else:
+            state, klass, bias, target_dir = "Mixed", "warn", "Range / wait", "range"
+    return {"price": f"{safe_num(row.get('latest_close')):,.2f}", "change": change, "score": score, "state": state, "klass": klass, "bias": bias, "target_dir": target_dir}
+
+
+def selected_tile() -> dict[str, object]:
+    key = st.session_state.get("selected_live_tile", "QQQ")
+    for tile in LIVE_TILE_DEFS:
+        if tile["key"] == key:
+            return tile
+    return LIVE_TILE_DEFS[1]
+
+
+def asset_rule_pack(tile: dict[str, object], row: pd.Series | None, state: dict[str, str | float]) -> dict[str, list[str] | str]:
+    key = str(tile["key"])
+    related = ", ".join([str(x) for x in tile.get("related", [])[:6]])
+    common: dict[str, list[str] | str] = {
+        "now": f"{tile['label']} is {state['state']} — {tile.get('sensitivity', 'live pressure read')}.",
+        "driver": "Global live state recalculates macro, AI, internals, liquidity, alerts, targets and search results.",
+        "related": related,
+    }
+    if key in ["QQQ", "NVDA", "SMH", "SPX", "BTC"]:
+        common.update({"confirm": ["Price remains weak or fails reclaim", "DXY stays firm", "10Y yield does not cool", "VIX stays bid", "Internals/breadth fail to improve", "Related leaders lag"], "invalidate": ["DXY rolls over", "Yields cool", "VIX fades", "Breadth improves", "Related leaders reclaim", "Credit/HYG confirms risk appetite"], "avoid": ["Avoid trusting bounces if AI/semis lag", "Avoid chasing after extension", "Avoid action before event release noise", "Avoid longs if DXY/yields keep pressing"]})
+    elif key in ["DXY", "10Y", "VIX", "OIL"]:
+        common.update({"confirm": ["Tile continues higher", "Risk assets weaken against it", "Alerts confirm same driver", "Event risk supports pressure", "Internals deteriorate"], "invalidate": ["Tile rejects or rolls over", "QQQ/SPX reclaim", "VIX/credit calms", "Breadth improves", "Gold/oil reaction contradicts"], "avoid": ["Avoid forcing risk-off if pressure asset rejects", "Avoid stale signals after event passes", "Avoid reading one pressure asset alone"]})
+    elif key in ["HYG", "RSP", "GLOBAL"]:
+        common.update({"confirm": ["Participation keeps improving", "Credit and breadth hold", "Indexes confirm direction", "Volatility stays calm", "Sector leadership broadens"], "invalidate": ["Breadth rolls over", "HYG/JNK weakens", "VIX rises", "Defensives lead", "Only mega-caps hold the market"], "avoid": ["Avoid risk-on if participation is narrow", "Avoid trusting index strength without credit/breadth", "Avoid treating defensive rotation as clean risk-on"]})
+    else:
+        common.update({"confirm": ["Related markets agree", "Macro driver confirms", "Internals confirm", "Alerts support the read"], "invalidate": ["Related markets disagree", "Driver reverses", "Internals split", "Event shock resets the read"], "avoid": ["Avoid one-market decisions", "Avoid middle of range", "Avoid stale data"]})
+    return common
+
+
+def render_global_live_strip() -> None:
+    read = build_action_read()
+    health = data_health_summary()
+    pieces = [("Action Console", str(read.get("state", "Mixed")), "Recalculated from live data"), ("Gauges", f"Macro {macro_result.score:.0f} / AI {ai_result.score:.0f}", "Scores update globally"), ("Targets", f"{len(target_rows())} live targets", "Pressure levels recalculated"), ("Alerts", f"{len(alert_rows())} active", "Live rule checks"), ("Data", str(health.get("overall", "Unknown")), str(health.get("detail", ""))[:28])]
+    html = ['<div class="global-live-strip">']
+    for label, main, sub in pieces:
+        html.append(f'<div class="global-live-card"><div class="label">{label}</div><div class="main">{main}</div><div class="sub">{sub}</div></div>')
+    html.append('</div>')
+    st.markdown(''.join(html), unsafe_allow_html=True)
+
+
+def render_selected_tile_panel() -> None:
+    tile = selected_tile()
+    row = live_tile_row(tile)
+    state = live_tile_state(tile, row)
+    target, invalid = level_text(row, str(state.get("target_dir", "range")), 1.0)
+    pack = asset_rule_pack(tile, row, state)
+    symbol = str(row.get("symbol")) if row is not None else str(tile["key"])
+    name = str(row.get("name")) if row is not None else str(tile["label"])
+    html = f"""
+    <div class="live-detail-panel">
+        <div class="selected-head">
+            <div><div class="selected-title">{tile['label']} Action Panel</div><div class="selected-sub">{name} · {symbol} · selected tile controls the detail read.</div></div>
+            {status_badge(str(state['state']), str(state['klass']))}
+        </div>
+        <div class="tile-action-grid">
+            <div class="tile-action-card"><div class="label">NOW</div><div class="main">{pack['now']}</div><div class="sub">Price {state['price']} · {float(state['change']):+.2f}%</div></div>
+            <div class="tile-action-card"><div class="label">TARGET</div><div class="main">{state['bias']}</div><div class="sub">Target: {target}</div></div>
+            <div class="tile-action-card"><div class="label">INVALIDATION</div><div class="main">{invalid}</div><div class="sub">Cancels selected-tile pressure read.</div></div>
+            <div class="tile-action-card"><div class="label">DRIVER</div><div class="main">{pack['driver']}</div><div class="sub">Global live engine, not tile-only.</div></div>
+            <div class="tile-action-card"><div class="label">RELATED</div><div class="main">{pack['related']}</div><div class="sub">Watch confirmation across these.</div></div>
+            <div class="tile-action-card"><div class="label">EVENT RISK</div><div class="main">{calendar.iloc[0]['event'] if not calendar.empty else 'No event loaded'}</div><div class="sub">{calendar.iloc[0]['countdown'] if not calendar.empty else 'Run update_events.py'}</div></div>
+        </div>
+    </div>
+    """
+    st.markdown(html, unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    for col, title, items, klass in [(c1, "CONFIRM", pack["confirm"], "good"), (c2, "INVALIDATE", pack["invalidate"], "bad"), (c3, "AVOID", pack["avoid"], "warn")]:
+        with col:
+            st.markdown(f'<div class="decision-card"><div class="card-title {klass}">{title}</div><ul class="micro-list">' + ''.join(f'<li>{x}</li>' for x in items) + '</ul></div>', unsafe_allow_html=True)
+
+
+def render_live_market_pulse() -> None:
+    st.markdown('<div class="section-head"><div class="section-title">Live Market Pulse</div><div class="section-caption">Selectable tiles drive the action panel; live data recalculates the whole engine</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="live-action-note">Global live refresh updates Action Console, gauges, targets, outcomes, alerts, search and the selected asset panel. Tiles are the control surface, not the only live feature.</div>', unsafe_allow_html=True)
+    render_global_live_strip()
+    group = st.radio("Tile category", LIVE_TILE_GROUPS, horizontal=True, label_visibility="collapsed", key="live_tile_group")
+    tiles = live_tile_defs_for_group(group)
+    if not tiles:
+        st.info("No live tiles in this category yet.")
+        return
+    for start_idx in range(0, len(tiles), 4):
+        cols = st.columns(4)
+        for col, tile in zip(cols, tiles[start_idx:start_idx + 4]):
+            row = live_tile_row(tile)
+            state = live_tile_state(tile, row)
+            label = f"{tile['label']}\n{state['price']}  {float(state['change']):+.2f}%\n{state['state']}"
+            with col:
+                if st.button(label, key=f"live_tile_{tile['key']}", use_container_width=True):
+                    st.session_state.selected_live_tile = tile["key"]
+                    st.rerun()
+    render_selected_tile_panel()
+
+
 def show_playbook_gold_card() -> None:
     play = cause_effect_df()
     gold = play[play["area"].astype(str).str.contains("Gold", case=False, na=False)].head(2)
@@ -1715,23 +1893,22 @@ def filter_df(df_to_filter: pd.DataFrame, query_key: str, placeholder: str = "Se
 # Pages
 # -----------------------------------------------------------------------------
 def page_dashboard() -> None:
-    """v8 decision-first home screen."""
+    """v8.1 decision-first home screen with global live action engine."""
     render_action_tiles()
     render_action_meters()
+    render_live_market_pulse()
     render_target_board()
     render_outcome_board()
     render_decision_board()
 
-    st.markdown('<div class="section-head"><div class="section-title">Fast Snapshot</div><div class="section-caption">Details stay below the action layer</div></div>', unsafe_allow_html=True)
-    snap_a, snap_b, snap_c = st.columns([1.1, 1.1, .9])
-    with snap_a:
-        st.markdown('<div class="card"><div class="card-title">Market Snapshot</div>', unsafe_allow_html=True)
-        market_snapshot_cards()
-        st.markdown('</div>', unsafe_allow_html=True)
-    with snap_b:
-        show_alerts_compact(5)
-    with snap_c:
-        show_events_compact(5)
+    st.markdown('<div class="section-head"><div class="section-title">Live Alerts / Event Risk / Health</div><div class="section-caption">Details stay below the action layer</div></div>', unsafe_allow_html=True)
+    live_a, live_b, live_c = st.columns([1.15, .95, .9])
+    with live_a:
+        show_alerts_compact(6)
+    with live_b:
+        show_events_compact(6)
+    with live_c:
+        show_data_health_compact()
 
     low_a, low_b, low_c = st.columns([1.0, 1.0, 1.0])
     with low_a:
@@ -1755,12 +1932,15 @@ def page_dashboard() -> None:
             st.dataframe(view[["symbol", "change_pct", "score"]], use_container_width=True, hide_index=True)
         st.markdown('</div>', unsafe_allow_html=True)
     with low_c:
-        show_data_health_compact()
+        st.markdown('<div class="card"><div class="card-title">Quick Market Snapshot</div>', unsafe_allow_html=True)
+        market_snapshot_cards()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(
-        f"<div class='footer-bar'>Last Updated: {latest_update_text(runs)} &nbsp; • &nbsp; Eastern/Toronto 12-hour time &nbsp; • &nbsp; Action targets are pressure levels, not trade orders.</div>",
+        f"<div class='footer-bar'>Last Updated: {latest_update_text(runs)} &nbsp; • &nbsp; Eastern/Toronto 12-hour time &nbsp; • &nbsp; Global live engine updates the full action console, not tiles alone.</div>",
         unsafe_allow_html=True,
     )
+
 
 def page_macro(category: str | None = None) -> None:
     title = category if category else "Macro"
