@@ -1,4 +1,4 @@
-"""Macro Regime Engine v7.4 unified command-center dashboard."""
+"""Macro Regime Engine v8 action console dashboard."""
 
 from __future__ import annotations
 
@@ -39,9 +39,9 @@ from scoring import (
     generate_internal_alerts,
 )
 
-APP_VERSION = "v7.4"
+APP_VERSION = "v8"
 DB_PATH = Path(DATABASE_PATH)
-LOCAL_TZ = datetime.now().astimezone().tzinfo
+LOCAL_TZ = ZoneInfo("America/Toronto")
 ET_TZ = ZoneInfo("America/New_York")
 
 st.set_page_config(page_title=f"Macro Regime Engine {APP_VERSION}", layout="wide", initial_sidebar_state="expanded")
@@ -164,7 +164,7 @@ def stop_background_updater() -> tuple[bool, str]:
 # Formatting helpers
 # -----------------------------------------------------------------------------
 def local_now() -> datetime:
-    return datetime.now().astimezone()
+    return datetime.now(LOCAL_TZ)
 
 
 def fmt_time(dt: datetime | pd.Timestamp | None) -> str:
@@ -590,6 +590,76 @@ st.markdown(
         text-overflow:ellipsis;
     }
 
+    /* v7.5 timezone + clean command bar + auto rerun controls */
+    .wide-status { min-height: 38px !important; padding: 8px 10px !important; }
+    .auto-rerun-box {
+        background: rgba(4,13,22,.58);
+        border: 1px solid rgba(93,124,151,.20);
+        border-radius: 11px;
+        padding: 8px 10px;
+        min-height: 36px;
+        font-size: .68rem;
+        line-height: 1.18;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .auto-rerun-box b { color:#e7eef7; }
+    div[data-testid="stButton"] button { white-space: nowrap !important; min-width: 92px !important; }
+    div[data-testid="stButton"] button p { white-space: nowrap !important; }
+    div[data-testid="stToggle"] label, div[data-testid="stSelectbox"] label { font-size: .68rem !important; }
+    .command-shell { margin-top: 4px !important; }
+
+    /* v8 Action Console: decision-first visual system */
+    .action-hero {
+        background: radial-gradient(circle at 12% 20%, rgba(74,163,255,.18), transparent 30%),
+                    linear-gradient(135deg, rgba(13,28,45,.98), rgba(7,17,28,.98) 55%, rgba(26,19,52,.92));
+        border: 1px solid rgba(93,124,151,.34);
+        border-radius: 18px;
+        padding: 12px 14px;
+        margin: 4px 0 10px 0;
+        box-shadow: 0 14px 36px rgba(0,0,0,.32);
+        overflow: hidden;
+    }
+    .action-kicker { font-size:.60rem; color:#8ea4b8; letter-spacing:.12em; text-transform:uppercase; font-weight:900; }
+    .action-state { font-size:1.55rem; font-weight:1000; line-height:1.05; color:#e7eef7; letter-spacing:-.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .action-line { color:#e7eef7; font-size:.86rem; font-weight:800; margin-top:5px; line-height:1.25; }
+    .action-note { color:#8ea4b8; font-size:.70rem; margin-top:5px; line-height:1.22; }
+    .action-pill { display:inline-block; border-radius:999px; padding:3px 8px; font-size:.58rem; font-weight:900; text-transform:uppercase; border:1px solid rgba(93,124,151,.30); background:rgba(10,22,34,.65); color:#dbeafe; margin-right:4px; }
+    .action-board { display:grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap:8px; margin:8px 0 10px 0; }
+    .action-tile { background: rgba(7,17,28,.82); border: 1px solid rgba(93,124,151,.25); border-radius: 13px; padding: 9px 10px; min-height: 92px; overflow:hidden; }
+    .action-tile .label { color:#8ea4b8; font-size:.56rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+    .action-tile .main { color:#e7eef7; font-size:.96rem; font-weight:1000; line-height:1.08; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .action-tile .sub { color:#8ea4b8; font-size:.66rem; line-height:1.18; margin-top:5px; }
+    .target-grid { display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap:8px; margin:6px 0 10px 0; }
+    .target-card { background: linear-gradient(180deg, rgba(20,34,50,.88), rgba(8,18,29,.92)); border:1px solid rgba(93,124,151,.25); border-radius:13px; padding:9px 10px; min-height:126px; overflow:hidden; }
+    .target-symbol { font-size:.66rem; color:#8ea4b8; text-transform:uppercase; letter-spacing:.08em; font-weight:900; }
+    .target-direction { font-size:.98rem; font-weight:1000; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .target-number { font-size:1.18rem; font-weight:1000; color:#e7eef7; margin-top:3px; }
+    .target-meta { color:#8ea4b8; font-size:.62rem; line-height:1.15; margin-top:4px; }
+    .outcome-grid { display:grid; grid-template-columns: 1.25fr 1fr 1fr; gap:10px; margin:7px 0 10px 0; }
+    .outcome-card { background: linear-gradient(180deg, rgba(16,31,48,.94), rgba(8,18,29,.94)); border: 1px solid rgba(93,124,151,.26); border-radius:15px; padding:11px 12px; min-height:174px; overflow:hidden; }
+    .outcome-rank { font-size:.62rem; color:#8ea4b8; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+    .outcome-title { font-size:1.02rem; font-weight:1000; margin:4px 0 5px 0; color:#e7eef7; }
+    .prob-bar { height:7px; border-radius:999px; background:rgba(93,124,151,.20); overflow:hidden; margin:7px 0; }
+    .prob-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,#ff4b45,#ffc83d,#29d66f); }
+    .micro-list { margin:6px 0 0 0; padding:0; list-style:none; }
+    .micro-list li { color:#dbeafe; font-size:.68rem; line-height:1.18; padding:2px 0; border-bottom:1px solid rgba(93,124,151,.10); }
+    .micro-list li:last-child { border-bottom:0; }
+    .decision-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; margin:7px 0 10px 0; }
+    .decision-card { background: rgba(10,22,34,.88); border:1px solid rgba(93,124,151,.25); border-radius:14px; padding:10px 12px; min-height:190px; }
+    .section-head { display:flex; align-items:center; justify-content:space-between; margin:14px 0 5px 0; }
+    .section-title { font-size:.78rem; color:#e7eef7; font-weight:1000; letter-spacing:.08em; text-transform:uppercase; }
+    .section-caption { color:#8ea4b8; font-size:.62rem; }
+    @media (max-width: 1180px) {
+        .action-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .target-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .outcome-grid { grid-template-columns: 1fr; }
+        .decision-grid { grid-template-columns: 1fr; }
+        .action-state { font-size:1.25rem; }
+    }
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -788,7 +858,7 @@ with st.sidebar:
         <div class="mini-card">
             <div class="card-title">Market Session</div>
             <div>New York {status_badge(session_text, session_class)}</div>
-            <div class="card-sub">Local time shown in regular 12-hour format.</div>
+            <div class="card-sub">Eastern/Toronto time shown in regular 12-hour format.</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -808,7 +878,7 @@ with st.sidebar:
 
 
 # -----------------------------------------------------------------------------
-# Unified command bar + search
+# Unified command bar + search + auto re-run
 # -----------------------------------------------------------------------------
 bg_running, bg_detail = background_updater_status()
 age = seconds_since_last_run(runs)
@@ -819,15 +889,24 @@ health_overall = "Operational" if inserted > 0 and errors == 0 else "Partial" if
 health_klass = "good" if health_overall == "Operational" else "warn" if health_overall == "Partial" else "bad"
 now = local_now()
 
+if "auto_rerun_on" not in st.session_state:
+    st.session_state.auto_rerun_on = True
+if "auto_rerun_interval" not in st.session_state:
+    st.session_state.auto_rerun_interval = 30
+
+next_rerun = f"{st.session_state.auto_rerun_interval}s" if st.session_state.auto_rerun_on else "OFF"
+last_run_display = latest_update_text(runs) if not runs.empty else "No run yet"
+
 st.markdown(
     f'''
     <div class="command-shell">
-        <div class="command-title">Unified Command Center · Search · Live Status · Local 12-Hour Time</div>
+        <div class="command-title">Unified Command Center · Search · Live Status · Eastern/Toronto 12-Hour Time · Auto Re-run</div>
     </div>
     ''',
     unsafe_allow_html=True,
 )
-cmd_search, cmd_time, cmd_live, cmd_data, cmd_start, cmd_stop, cmd_update = st.columns([4.2, .75, .85, 1.0, .68, .55, .62])
+
+cmd_search, cmd_status = st.columns([4.9, 2.1])
 with cmd_search:
     global_query = st.text_input(
         "Search anything",
@@ -835,38 +914,67 @@ with cmd_search:
         label_visibility="collapsed",
         key="main_global_search",
     )
-with cmd_time:
-    st.markdown(f'<div class="command-status"><b>{fmt_time(now)}</b><br><span class="muted">Local</span></div>', unsafe_allow_html=True)
-with cmd_live:
-    st.markdown(
-        f'<div class="command-status"><b>Pulse</b><br>{status_badge("LIVE" if live_klass == "good" else "STALE", live_klass)} <span class="muted">{human_age(age)}</span></div>',
-        unsafe_allow_html=True,
-    )
-with cmd_data:
+with cmd_status:
     health_detail = f"{inserted:,} saved" if inserted else "Run update"
+    bg_badge = status_badge("RUNNING" if bg_running else "STOPPED", "good" if bg_running else "warn")
     st.markdown(
-        f'<div class="command-status"><b>Data</b><br>{status_badge(health_overall, health_klass)} <span class="muted">{health_detail}</span></div>',
+        f'''
+        <div class="command-status wide-status">
+            <b>{fmt_time(now)}</b> <span class="muted">Eastern</span>
+            &nbsp; | &nbsp; Pulse {status_badge("LIVE" if live_klass == "good" else "STALE", live_klass)} <span class="muted">{human_age(age)}</span>
+            &nbsp; | &nbsp; Data {status_badge(health_overall, health_klass)} <span class="muted">{health_detail}</span>
+            &nbsp; | &nbsp; BG {bg_badge}
+        </div>
+        ''',
         unsafe_allow_html=True,
     )
-with cmd_start:
-    if st.button("Start", use_container_width=True, help="Start background live updater"):
+
+ctrl1, ctrl2, ctrl3, ctrl4, ctrl5, ctrl6 = st.columns([1.0, .8, .95, .95, 1.05, 2.25])
+with ctrl1:
+    auto_on = st.toggle("Auto", value=st.session_state.auto_rerun_on, help="Auto re-run the dashboard view without using a full browser refresh.")
+    st.session_state.auto_rerun_on = auto_on
+with ctrl2:
+    interval = st.selectbox("Interval", [15, 30, 60], index=[15, 30, 60].index(st.session_state.auto_rerun_interval), label_visibility="collapsed")
+    st.session_state.auto_rerun_interval = int(interval)
+with ctrl3:
+    if st.button("Start Live", use_container_width=True, help="Start background live updater"):
         ok, msg = start_background_updater(15)
         st.toast(msg, icon="✅" if ok else "⚠️")
         st.rerun()
-with cmd_stop:
-    if st.button("Stop", use_container_width=True, help="Stop background live updater"):
+with ctrl4:
+    if st.button("Stop Live", use_container_width=True, help="Stop background live updater"):
         ok, msg = stop_background_updater()
         st.toast(msg, icon="✅" if ok else "⚠️")
         st.rerun()
-with cmd_update:
-    if st.button("Now", use_container_width=True, help="Run one live update now"):
+with ctrl5:
+    if st.button("Update Now", use_container_width=True, help="Run one live update now"):
         ok, msg = run_update()
         st.toast("Live update complete" if ok else "Live update issue", icon="✅" if ok else "⚠️")
         if not ok:
             st.warning(msg[:900])
         st.rerun()
+with ctrl6:
+    st.markdown(
+        f'''
+        <div class="auto-rerun-box">
+            <b>Auto Re-run:</b> {"ON" if st.session_state.auto_rerun_on else "OFF"}
+            &nbsp; | &nbsp; <b>Every:</b> {next_rerun}
+            &nbsp; | &nbsp; <b>Last Run:</b> {last_run_display}
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
 
-# No automatic browser reload. Data updates are handled by live_updater.py in the background.
+# Auto re-run without a browser page refresh. This only re-executes the Streamlit script.
+if st.session_state.auto_rerun_on:
+    try:
+        from streamlit_autorefresh import st_autorefresh
+        st_autorefresh(interval=int(st.session_state.auto_rerun_interval) * 1000, key="macro_engine_autorun")
+    except Exception:
+        # If the optional component is unavailable, keep the app usable instead of breaking the dashboard.
+        pass
+
+# Data itself is updated by live_updater.py in the background. Auto re-run only refreshes what the dashboard displays.
 
 # -----------------------------------------------------------------------------
 # Search results
@@ -1036,6 +1144,231 @@ def alert_rows() -> list[dict[str, str]]:
         rows.append({"time": now_str, "alert": msg, "priority": priority, "type": "Global"})
     return rows
 
+
+# -----------------------------------------------------------------------------
+# v8 Action engine: NOW -> TARGET -> OUTCOME -> CONFIRM -> INVALIDATE -> AVOID
+# -----------------------------------------------------------------------------
+def category_score(cats: pd.DataFrame, category: str) -> float:
+    if cats.empty or "category" not in cats.columns:
+        return 0.0
+    row = cats[cats["category"].eq(category)]
+    if row.empty:
+        return 0.0
+    return safe_num(row.iloc[0].get("score"))
+
+
+def row_by_any(table: pd.DataFrame, names: list[str]) -> pd.Series | None:
+    if table.empty:
+        return None
+    for name in names:
+        row = table[table["name"].astype(str).str.lower().eq(name.lower())]
+        if not row.empty:
+            return row.iloc[0]
+        row = table[table["symbol"].astype(str).str.lower().eq(name.lower())]
+        if not row.empty:
+            return row.iloc[0]
+    for name in names:
+        row = table[table["name"].astype(str).str.contains(name, case=False, regex=False, na=False)]
+        if not row.empty:
+            return row.iloc[0]
+    return None
+
+
+def level_text(row: pd.Series | None, direction: str, strength: float = 1.0) -> tuple[str, str]:
+    if row is None or pd.isna(row.get("latest_close")):
+        return "Waiting for live price", "Waiting for live price"
+    close = safe_num(row.get("latest_close"))
+    score = abs(safe_num(row.get("score")))
+    step_pct = max(0.35, min(2.75, (score / 100.0) * 2.0 * max(0.6, strength)))
+    reclaim_pct = max(0.25, min(1.35, step_pct * 0.55))
+    if direction.lower().startswith("down"):
+        target = close * (1 - step_pct / 100.0)
+        invalid = close * (1 + reclaim_pct / 100.0)
+        return f"{target:,.2f}", f"Reclaim > {invalid:,.2f}"
+    if direction.lower().startswith("up"):
+        target = close * (1 + step_pct / 100.0)
+        invalid = close * (1 - reclaim_pct / 100.0)
+        return f"{target:,.2f}", f"Fail < {invalid:,.2f}"
+    low = close * (1 - step_pct / 200.0)
+    high = close * (1 + step_pct / 200.0)
+    return f"{low:,.2f}–{high:,.2f}", "Wait for clean break"
+
+
+def strongest_pressure() -> tuple[str, float]:
+    pieces: list[tuple[str, float]] = []
+    for table in [macro_cats, ai_cats, internal_cats, global_cats]:
+        if table is not None and not table.empty:
+            for _, row in table.iterrows():
+                pieces.append((str(row.get("category", "Unknown")), safe_num(row.get("score"))))
+    if not pieces:
+        return "No data", 0.0
+    return min(pieces, key=lambda x: x[1])
+
+
+def strongest_support() -> tuple[str, float]:
+    pieces: list[tuple[str, float]] = []
+    for table in [macro_cats, ai_cats, internal_cats, global_cats]:
+        if table is not None and not table.empty:
+            for _, row in table.iterrows():
+                pieces.append((str(row.get("category", "Unknown")), safe_num(row.get("score"))))
+    if not pieces:
+        return "No data", 0.0
+    return max(pieces, key=lambda x: x[1])
+
+
+def build_action_read() -> dict[str, object]:
+    rates = category_score(macro_cats, "Rates")
+    dollar = category_score(macro_cats, "Dollar")
+    commodities = category_score(macro_cats, "Commodities")
+    volatility = category_score(macro_cats, "Volatility")
+    liquidity = (rates + dollar) / 2.0
+    composite = (macro_result.score + ai_result.score + internal_result.score + global_result.score) / 4.0
+    pressure_name, pressure_score = strongest_pressure()
+    support_name, support_score = strongest_support()
+    negative_votes = sum(score < -15 for score in [macro_result.score, ai_result.score, internal_result.score, global_result.score, rates, dollar, liquidity])
+    positive_votes = sum(score > 15 for score in [macro_result.score, ai_result.score, internal_result.score, global_result.score, rates, dollar, liquidity])
+    if negative_votes >= 4 or composite <= -25:
+        state = "Risk-Off Pressure"
+        action = "Do not trust risk-on until dollar, yields, internals, and AI leadership cool together."
+        main_pressure = "QQQ / AI / Growth"
+        best_side = "Fade weak risk-on / protect longs"
+    elif positive_votes >= 4 or composite >= 25:
+        state = "Risk-On Support"
+        action = "Risk appetite is supported while internals and leadership continue confirming."
+        main_pressure = "Defensives / cash rotation"
+        best_side = "Follow confirmed pullbacks"
+    else:
+        state = "Mixed Chop / Confirmation Needed"
+        action = "Avoid chasing middle. Wait for dollar/yields and internals to agree."
+        main_pressure = "Range-bound indexes"
+        best_side = "Wait for confirmation"
+    gold_row = row_by_any(combined_table, ["Gold Futures", "GC=F"])
+    if commodities > 15 or (gold_row is not None and safe_num(gold_row.get("score")) > 15):
+        support_asset = "Gold / commodities"
+    elif internal_result.score < -20:
+        support_asset = "Defensives / cash"
+    else:
+        support_asset = support_name
+    confidence = int(max(35, min(92, 45 + abs(composite) * 0.35 + max(negative_votes, positive_votes) * 5)))
+    return {"state": state, "action": action, "primary_driver": f"{pressure_name} ({pressure_score:.0f})", "support_driver": f"{support_name} ({support_score:.0f})", "main_pressure": main_pressure, "support_asset": support_asset, "best_side": best_side, "confidence": confidence, "rates": rates, "dollar": dollar, "commodities": commodities, "volatility": volatility, "liquidity": liquidity, "composite": composite}
+
+
+def target_rows() -> list[dict[str, str]]:
+    read = build_action_read()
+    risk_off = safe_num(read["composite"]) < -15 or safe_num(read["liquidity"]) < -15
+    qqq = row_by_any(combined_table, ["QQQ", "Nasdaq 100", "^NDX"])
+    dxy = row_by_any(combined_table, ["US Dollar Index", "US Dollar ETF", "DX-Y.NYB", "UUP"])
+    ten_y = row_by_any(combined_table, ["US 10Y Yield", "^TNX", "10Y"])
+    gold = row_by_any(combined_table, ["Gold Futures", "GC=F"])
+    vix = row_by_any(combined_table, ["VIX", "^VIX"])
+    nvda = row_by_any(combined_table, ["Nvidia", "NVDA"])
+    q_dir = "Downside pressure" if risk_off else "Upside / reclaim"
+    d_dir = "Upside pressure" if safe_num(read["dollar"]) < -10 else "Downside / relief"
+    y_dir = "Upside pressure" if safe_num(read["rates"]) < -10 else "Downside / relief"
+    g_dir = "Upside safety bid" if risk_off or (gold is not None and safe_num(gold.get("score")) > 10) else "Range / wait"
+    v_dir = "Upside fear expansion" if risk_off else "Downside compression"
+    n_dir = "AI weakness watch" if ai_result.score < -10 or risk_off else "AI leadership watch"
+    rows = []
+    for label, row, direction, why, strength in [("QQQ / NDX", qqq, q_dir, "Growth target from macro + AI pressure", 1.0), ("DXY", dxy, d_dir, "Dollar confirms/denies liquidity pressure", 0.9), ("10Y Yield", ten_y, y_dir, "Yield pressure drives growth/AI valuation", 0.8), ("Gold", gold, g_dir, "Safety/inflation hedge target", 0.75), ("VIX", vix, v_dir, "Volatility confirms/denies risk tone", 0.9), ("NVDA", nvda, n_dir, "AI leadership confirmation target", 1.1)]:
+        td = "down" if "Downside" in direction or "weakness" in direction or "compression" in direction else "up" if "Upside" in direction or "leadership" in direction else "range"
+        tgt, invalid = level_text(row, td, strength)
+        klass = "bad" if td == "down" and label in ["QQQ / NDX", "NVDA"] else "good" if td == "up" else "warn"
+        rows.append({"asset": label, "direction": direction, "target": tgt, "invalid": invalid, "why": why, "klass": klass})
+    return rows
+
+
+def outcome_rows() -> list[dict[str, object]]:
+    read = build_action_read()
+    comp = safe_num(read["composite"])
+    liq = safe_num(read["liquidity"])
+    internals = internal_result.score
+    ai = ai_result.score
+    if comp <= -20 or liq <= -20:
+        return [{"rank": "Outcome 1", "title": "Risk-Off Continuation", "prob": 55, "target": "QQQ/AI lower, DXY/yields firm, VIX bid", "confirm": "DXY up + yields up + internals weak", "invalidate": "QQQ reclaim + DXY rolls over + breadth improves"}, {"rank": "Outcome 2", "title": "Relief Bounce", "prob": 30, "target": "QQQ/NVDA bounce, VIX cools", "confirm": "Yields down + DXY down + AI leaders recover", "invalidate": "AI leaders fail / VIX expands"}, {"rank": "Outcome 3", "title": "Mixed Chop", "prob": 15, "target": "Range-bound fakeouts", "confirm": "No clear leader + mixed breadth", "invalidate": "Clean breakout with internals confirming"}]
+    if comp >= 20 and internals >= 10:
+        return [{"rank": "Outcome 1", "title": "Risk-On Continuation", "prob": 58, "target": "QQQ/AI higher, VIX lower, credit firm", "confirm": "Breadth improves + yields stable + AI leads", "invalidate": "DXY/yields spike + VIX rises"}, {"rank": "Outcome 2", "title": "Rotation / Pullback", "prob": 27, "target": "Index digestion, sector rotation", "confirm": "Leaders pause while internals hold", "invalidate": "Breadth turns negative"}, {"rank": "Outcome 3", "title": "Failed Risk-On", "prob": 15, "target": "Fakeout into pressure", "confirm": "DXY/yields rise against risk assets", "invalidate": "Fresh highs with internals"}]
+    return [{"rank": "Outcome 1", "title": "Mixed Chop", "prob": 45, "target": "Range trades / two-sided action", "confirm": "Signals stay split", "invalidate": "Dollar, yields, internals align"}, {"rank": "Outcome 2", "title": "Risk-Off Break", "prob": 32 if ai < 0 else 25, "target": "QQQ lower, VIX higher", "confirm": "AI + breadth weaken together", "invalidate": "QQQ reclaim with breadth"}, {"rank": "Outcome 3", "title": "Risk-On Reclaim", "prob": 23 if ai < 0 else 30, "target": "QQQ/AI higher", "confirm": "DXY down + yields cool", "invalidate": "Reclaim fails"}]
+
+
+def confirm_invalid_avoid() -> tuple[list[str], list[str], list[str]]:
+    read = build_action_read()
+    risk_off = safe_num(read["composite"]) < -15 or safe_num(read["liquidity"]) < -15
+    if risk_off:
+        return (["DXY holds firm / pushes higher", "2Y/10Y yields stay firm", "QQQ and NVDA fail reclaim", "VIX/VVIX bid stays active", "Breadth/equal-weight remains weak", "Credit/HYG does not confirm risk-on"], ["DXY rolls over", "Yields cool decisively", "QQQ reclaims pressure level", "AI leaders recover first", "VIX fades", "Breadth/equal-weight improves"], ["Avoid chasing shorts after large extension", "Avoid risk-off if VIX refuses to confirm", "Avoid trusting weakness if QQQ/NVDA reclaim quickly", "Avoid trading before major event release noise"])
+    if safe_num(read["composite"]) > 15:
+        return (["Breadth expands", "QQQ/NVDA/SMH lead", "VIX compresses", "DXY stays soft", "Yields stable or falling", "Credit/HYG confirms"], ["DXY spikes", "Yields spike", "Internals diverge", "AI leaders lag", "VIX rises while indexes hold", "Credit weakens"], ["Avoid chasing highs if internals are narrow", "Avoid risk-on if only mega-cap AI is holding", "Avoid longs into hot data event risk", "Avoid if VIX rises against the move"])
+    return (["Wait for DXY + yields agreement", "Wait for QQQ + internals confirmation", "Wait for VIX direction", "Watch AI leaders vs equal-weight", "Check credit before trusting move"], ["No clean invalidation in chop", "A confirmed break with internals changes the read", "Event shock can reset the regime"], ["Avoid middle of range", "Avoid acting on one market alone", "Avoid over-weighting paragraph info over NOW/TARGET/CONFIRM", "Avoid trades without liquidity + internals agreement"])
+
+
+def render_action_tiles() -> None:
+    read = build_action_read()
+    next_event = str(calendar.iloc[0]["event"]) if not calendar.empty else "No event"
+    next_countdown = str(calendar.iloc[0]["countdown"]) if not calendar.empty else "Run event update"
+    st.markdown(f'''
+        <div class="action-hero">
+            <div class="action-kicker">Action Console · Decision First</div>
+            <div class="action-state">{read["state"]}</div>
+            <div class="action-line">{read["action"]}</div>
+            <div class="action-note"><span class="action-pill">Confidence {read["confidence"]}%</span><span class="action-pill">Best Side: {read["best_side"]}</span><span class="action-pill">Live Age: {human_age(seconds_since_last_run(runs))}</span></div>
+        </div>
+        <div class="action-board">
+            <div class="action-tile"><div class="label">NOW</div><div class="main">{read["state"]}</div><div class="sub">Current regime from macro, AI, internals, and global pressure.</div></div>
+            <div class="action-tile"><div class="label">DRIVER</div><div class="main">{read["primary_driver"]}</div><div class="sub">Largest pressure source currently pulling the tape.</div></div>
+            <div class="action-tile"><div class="label">PRESSURE</div><div class="main">{read["main_pressure"]}</div><div class="sub">Most sensitive asset group if this read continues.</div></div>
+            <div class="action-tile"><div class="label">SUPPORT</div><div class="main">{read["support_asset"]}</div><div class="sub">Area most likely to hold/benefit if pressure persists.</div></div>
+            <div class="action-tile"><div class="label">NEXT RISK</div><div class="main">{next_event}</div><div class="sub">{next_countdown}</div></div>
+        </div>
+        ''', unsafe_allow_html=True)
+
+
+def render_target_board() -> None:
+    st.markdown('<div class="section-head"><div class="section-title">Target Board</div><div class="section-caption">Directional pressure levels from live prices</div></div>', unsafe_allow_html=True)
+    html = ['<div class="target-grid">']
+    for row in target_rows():
+        html.append(f'''<div class="target-card"><div class="target-symbol">{row["asset"]}</div><div class="target-direction {row["klass"]}">{row["direction"]}</div><div class="target-number">{row["target"]}</div><div class="target-meta"><b>Cancel:</b> {row["invalid"]}</div><div class="target-meta">{row["why"]}</div></div>''')
+    html.append('</div>')
+    st.markdown(''.join(html), unsafe_allow_html=True)
+
+
+def render_outcome_board() -> None:
+    st.markdown('<div class="section-head"><div class="section-title">Outcome Board</div><div class="section-caption">Ranked scenario path</div></div>', unsafe_allow_html=True)
+    html = ['<div class="outcome-grid">']
+    for row in outcome_rows():
+        prob = int(row["prob"])
+        html.append(f'''<div class="outcome-card"><div class="outcome-rank">{row["rank"]} · {prob}%</div><div class="outcome-title">{row["title"]}</div><div class="prob-bar"><div class="prob-fill" style="width:{prob}%"></div></div><ul class="micro-list"><li><b>Target:</b> {row["target"]}</li><li><b>Confirm:</b> {row["confirm"]}</li><li><b>Invalidate:</b> {row["invalidate"]}</li></ul></div>''')
+    html.append('</div>')
+    st.markdown(''.join(html), unsafe_allow_html=True)
+
+
+def render_decision_board() -> None:
+    confirm, invalidate, avoid = confirm_invalid_avoid()
+    st.markdown('<div class="section-head"><div class="section-title">Confirm / Invalidate / Avoid</div><div class="section-caption">Use this before trusting the read</div></div>', unsafe_allow_html=True)
+    def card(title: str, items: list[str], klass: str) -> str:
+        lis = ''.join(f'<li>{x}</li>' for x in items[:6])
+        return f'<div class="decision-card"><div class="card-title {klass}">{title}</div><ul class="micro-list">{lis}</ul></div>'
+    st.markdown('<div class="decision-grid">' + card('CONFIRM', confirm, 'good') + card('INVALIDATE', invalidate, 'bad') + card('AVOID', avoid, 'warn') + '</div>', unsafe_allow_html=True)
+
+
+def render_action_meters() -> None:
+    rates_score = category_score(macro_cats, "Rates")
+    dollar_score = category_score(macro_cats, "Dollar")
+    liquidity_score = (rates_score + dollar_score) / 2.0
+    risk_sentiment_score = (macro_result.score + ai_result.score + internal_result.score + global_result.score) / 4.0
+    st.markdown('<div class="section-head"><div class="section-title">Pressure Gauges</div><div class="section-caption">Kept central, not hidden</div></div>', unsafe_allow_html=True)
+    meter_cols = st.columns(5)
+    with meter_cols[0]: show_meter("Macro", macro_result.score, macro_result.regime)
+    with meter_cols[1]: show_meter("AI Growth", ai_result.score, ai_result.regime)
+    with meter_cols[2]: show_meter("Internals", internal_result.score, internal_result.regime)
+    with meter_cols[3]: show_meter("Liquidity", liquidity_score, "Bonds + dollar pressure")
+    with meter_cols[4]: show_meter("Risk", risk_sentiment_score, "Composite market tone")
+
+
+def render_search_action_result(query: str, bundle: dict[str, list[str] | str] | None) -> None:
+    st.markdown('<div class="section-head"><div class="section-title">Action Read</div><div class="section-caption">Search output converted into targets/outcomes</div></div>', unsafe_allow_html=True)
+    render_action_tiles()
+    render_target_board()
+    render_decision_board()
+
 def show_search_results(query: str) -> bool:
     q = query.strip()
     if not q:
@@ -1044,6 +1377,7 @@ def show_search_results(query: str) -> bool:
     topic_key, bundle = identify_search_topic(q)
     title = str(bundle.get("title")) if bundle else q.upper()
     st.markdown(f"### Search Intelligence: {title}")
+    render_search_action_result(q, bundle)
     found = False
 
     if bundle:
@@ -1381,105 +1715,52 @@ def filter_df(df_to_filter: pd.DataFrame, query_key: str, placeholder: str = "Se
 # Pages
 # -----------------------------------------------------------------------------
 def page_dashboard() -> None:
-    rates_score = safe_num(macro_cats[macro_cats["category"].eq("Rates")]["score"].iloc[0]) if not macro_cats[macro_cats["category"].eq("Rates")].empty else 0
-    dollar_score = safe_num(macro_cats[macro_cats["category"].eq("Dollar")]["score"].iloc[0]) if not macro_cats[macro_cats["category"].eq("Dollar")].empty else 0
-    commod_score = safe_num(macro_cats[macro_cats["category"].eq("Commodities")]["score"].iloc[0]) if not macro_cats[macro_cats["category"].eq("Commodities")].empty else 0
-    sentiment = max(0, min(100, int((macro_result.score + 100) / 2)))
-    liquidity_score = (rates_score + dollar_score) / 2.0
-    risk_sentiment_score = (macro_result.score + ai_result.score + internal_result.score + global_result.score) / 4.0
+    """v8 decision-first home screen."""
+    render_action_tiles()
+    render_action_meters()
+    render_target_board()
+    render_outcome_board()
+    render_decision_board()
 
-    st.markdown("#### Regime Meter Gauges")
-    meter_cols = st.columns(5)
-    with meter_cols[0]:
-        show_meter("Macro", macro_result.score, macro_result.regime)
-    with meter_cols[1]:
-        show_meter("AI Growth", ai_result.score, ai_result.regime)
-    with meter_cols[2]:
-        show_meter("Internals", internal_result.score, internal_result.regime)
-    with meter_cols[3]:
-        show_meter("Liquidity", liquidity_score, "Bonds + dollar pressure")
-    with meter_cols[4]:
-        show_meter("Risk", risk_sentiment_score, "Composite market tone")
-
-    top_a, top_b, top_c, top_d = st.columns(4)
-    with top_a:
-        regime_card("Macro", macro_result.regime.replace(" / ", "/"), "Liquidity / risk", macro_result.score)
-    with top_b:
-        regime_card("AI / Tech", ai_result.regime.replace(" / ", "/"), "Leadership", ai_result.score, "purple" if ai_result.score >= 0 else "warn")
-    with top_c:
-        regime_card("Internals", internal_result.regime.replace(" / ", "/"), "Breadth / sectors / credit", internal_result.score)
-    with top_d:
-        regime_card("Global", global_result.regime.replace(" / ", "/"), "World confirmation", global_result.score)
-
-    top2_a, top2_b, top2_c, top2_d = st.columns([1.0, 1.0, 1.0, 1.25])
-    with top2_a:
-        regime_card("Bonds", "Yields Firm" if rates_score < -10 else "Yield Relief" if rates_score > 10 else "Mixed", "Rate pressure", rates_score)
-    with top2_b:
-        regime_card("Dollar", "DXY Strong" if dollar_score < -10 else "DXY Soft" if dollar_score > 10 else "Mixed", "Dollar pressure", -dollar_score)
-    with top2_c:
-        regime_card("Commodities", "Inflation Watch" if commod_score < -10 else "Growth Support" if commod_score > 10 else "Mixed", "Gold / oil / copper", commod_score)
-    with top2_d:
-        show_data_health_compact()
-
-    row1_a, row1_b, row1_c, row1_d = st.columns([1.45, 1.25, 1.25, 1.15])
-    with row1_a:
-        st.markdown('<div class="card"><div class="card-title">What Matters Now</div>', unsafe_allow_html=True)
-        for idx, item in enumerate(what_matters_now(), start=1):
-            klass = "bad" if any(w in item.lower() for w in ["pressure", "risk-off", "weak", "rising"] ) else "warn"
-            st.markdown(f'<div class="line-item"><div class="{klass}"><b>{idx})</b></div><div>{item}</div></div>', unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    with row1_b:
-        st.markdown('<div class="card"><div class="card-title">Next Major Event</div>', unsafe_allow_html=True)
-        if calendar.empty:
-            st.write("No event calendar loaded.")
-        else:
-            e = calendar.iloc[0]
-            st.markdown(f'<div class="big-num warn">{e["countdown"]}</div>', unsafe_allow_html=True)
-            st.markdown(f"**{e['event']}**")
-            st.write(e["local_time"])
-            st.caption("Why it matters")
-            st.write(e.get("cause_risk", ""))
-            st.caption("What to watch")
-            st.write(e.get("watch_before", ""))
-        st.markdown("</div>", unsafe_allow_html=True)
-    with row1_c:
+    st.markdown('<div class="section-head"><div class="section-title">Fast Snapshot</div><div class="section-caption">Details stay below the action layer</div></div>', unsafe_allow_html=True)
+    snap_a, snap_b, snap_c = st.columns([1.1, 1.1, .9])
+    with snap_a:
+        st.markdown('<div class="card"><div class="card-title">Market Snapshot</div>', unsafe_allow_html=True)
+        market_snapshot_cards()
+        st.markdown('</div>', unsafe_allow_html=True)
+    with snap_b:
         show_alerts_compact(5)
-    with row1_d:
+    with snap_c:
         show_events_compact(5)
 
-    st.subheader("Market Snapshot")
-    market_snapshot_cards()
-
-    r2a, r2b, r2c, r2d = st.columns([1.35, 1.2, 1.2, 1.0])
-    with r2a:
-        show_playbook_gold_card()
-    with r2b:
-        st.markdown('<div class="card"><div class="card-title">AI / Tech Leaders</div>', unsafe_allow_html=True)
+    low_a, low_b, low_c = st.columns([1.0, 1.0, 1.0])
+    with low_a:
+        st.markdown('<div class="card"><div class="card-title">Internal Confirmation</div>', unsafe_allow_html=True)
+        metrics = internal_participation(internal_table)
+        pct = metrics["positive_pct"]
+        klass = "good" if pct >= 55 else "warn" if pct >= 40 else "bad"
+        st.markdown(f'<div class="big-num {klass}">{pct:.0f}% positive</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-sub">Breadth / sectors / credit / vol participation</div>', unsafe_allow_html=True)
+        leaders = metrics.get("leaders")
+        if isinstance(leaders, pd.DataFrame) and not leaders.empty:
+            st.dataframe(leaders[["symbol", "score"]].round(2), use_container_width=True, hide_index=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    with low_b:
+        st.markdown('<div class="card"><div class="card-title">AI Leadership</div>', unsafe_allow_html=True)
         ai_leaders = ai_table[ai_table["category"].eq("AI Leaders")].copy()
         if ai_leaders.empty:
             st.write("No AI leader data loaded.")
         else:
-            view = _format_view(ai_leaders).sort_values("score", ascending=False)
-            st.dataframe(view[["symbol", "latest_close", "change_pct", "score"]], use_container_width=True, hide_index=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    with r2c:
-        st.markdown('<div class="card"><div class="card-title">Scenario Matrix</div>', unsafe_allow_html=True)
-        st.dataframe(scenario_df().head(5), use_container_width=True, hide_index=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    with r2d:
-        st.markdown('<div class="card"><div class="card-title">Live Source Map</div>', unsafe_allow_html=True)
-        st.markdown('<div class="line-item"><div style="flex:1">Prices / AI / commodities</div><span class="badge good">yfinance</span></div>', unsafe_allow_html=True)
-        st.markdown('<div class="line-item"><div style="flex:1">Economy / inflation / jobs</div><span class="badge good">BLS</span></div>', unsafe_allow_html=True)
-        st.markdown('<div class="line-item"><div style="flex:1">Internals / sectors / credit</div><span class="badge good">yfinance</span></div>', unsafe_allow_html=True)
-        st.markdown('<div class="line-item"><div style="flex:1">Global market proxies</div><span class="badge good">yfinance</span></div>', unsafe_allow_html=True)
-        st.markdown('<div class="line-item"><div style="flex:1">Curves</div><span class="badge info">computed</span></div>', unsafe_allow_html=True)
+            view = _format_view(ai_leaders).sort_values("score", ascending=False).head(6)
+            st.dataframe(view[["symbol", "change_pct", "score"]], use_container_width=True, hide_index=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    with low_c:
+        show_data_health_compact()
 
     st.markdown(
-        f"<div class='footer-bar'>Last Updated: {latest_update_text(runs)} &nbsp; • &nbsp; All displayed event times are local 12-hour time &nbsp; • &nbsp; Data Source: live yfinance + BLS + internals + global proxies + computed curves</div>",
+        f"<div class='footer-bar'>Last Updated: {latest_update_text(runs)} &nbsp; • &nbsp; Eastern/Toronto 12-hour time &nbsp; • &nbsp; Action targets are pressure levels, not trade orders.</div>",
         unsafe_allow_html=True,
     )
-
 
 def page_macro(category: str | None = None) -> None:
     title = category if category else "Macro"
@@ -1637,12 +1918,12 @@ def page_components() -> None:
 
 def page_event_watch() -> None:
     st.header("Event Watch")
-    st.caption("Automatic calendar. Times are converted from official/release time to your local 12-hour time when exact time is available.")
+    st.caption("Automatic calendar. Times are converted from official/release time to your Eastern/Toronto 12-hour time when exact time is available.")
     cols = st.columns(4)
     cols[0].metric("Upcoming Events", len(calendar))
     cols[1].metric("High / Extreme", int(calendar[calendar["importance"].astype(str).str.contains("High|Extreme", case=False, regex=True)].shape[0]) if not calendar.empty else 0)
     cols[2].metric("Next Event", str(calendar.iloc[0]["event"])[:22] if not calendar.empty else "None")
-    cols[3].metric("Local Time", fmt_time(local_now()))
+    cols[3].metric("Eastern Time", fmt_time(local_now()))
     if not calendar.empty:
         show_events_compact(8)
         view_cols = ["countdown", "local_time", "event", "importance", "market_focus", "exactness", "cause_risk", "watch_before", "watch_after", "likely_markets"]
@@ -1767,7 +2048,7 @@ def page_update_runs() -> None:
 def page_settings() -> None:
     st.header("Settings")
     st.write("Time display is locked to your requested default:")
-    st.write("• Local computer time")
+    st.write("• Eastern/Toronto time")
     st.write("• Regular 12-hour format")
     st.write("• Event times convert from New York release time when the event has an exact scheduled time")
     st.subheader("Run commands")
